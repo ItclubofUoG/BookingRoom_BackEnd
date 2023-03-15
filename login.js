@@ -1,8 +1,8 @@
 const puppeteer = require("puppeteer");
 
 async function login() {
-    const email = '';
-    const password = '';
+    const email = 'LocNPGCC210155@fpt.edu.vn';
+    const password = 'loskyxxx0005280';
 
     const browser = await puppeteer.launch({
         headless:false,
