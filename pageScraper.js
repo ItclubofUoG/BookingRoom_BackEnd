@@ -52,15 +52,20 @@ const scraperObject = {
 			// await newPage.goto(link, { waitUntil: 'networkidle2' });
 			await newPage.goto(link);
 
-			let numRow = await newPage.$$eval('#ctl00_mainContent_divDetail table tbody tr td:nth-child(2)',items => items.length);
-			// console.log(numRow);
-			for (let row = 1; row <= numRow; row++) {
-				let time = await newPage.$eval('#ctl00_mainContent_divDetail table tbody tr:nth-child('+ row +') td:nth-child(2)', text => text.textContent);
-				let slot = await newPage.$eval('#ctl00_mainContent_divDetail table tbody tr:nth-child('+ row +') td:nth-child(3)', text => text.textContent);
-				let room = await newPage.$eval('#ctl00_mainContent_divDetail table tbody tr:nth-child('+ row +') td:nth-child(4)', text => text.textContent);
-				let teacher = await newPage.$eval('#ctl00_mainContent_divDetail table tbody tr:nth-child('+ row +') td:nth-child(5)', text => text.textContent);
+			let numTable = await newPage.$$eval('#ctl00_mainContent_divDetail table',items => items.length);
+			// console.log(numTable);	
+			for (let table = 1; table <= numTable; table++) {
+				let numRow = await newPage.$$eval('#ctl00_mainContent_divDetail table:nth-child('+ table + ') tbody tr',items => items.length);
 
-				dataObj.push({time,slot,room,teacher});
+				for (let row = 1; row <= numRow; row++) {
+					let time = await newPage.$eval('#ctl00_mainContent_divDetail table:nth-child('+ table + ') tbody tr:nth-child('+ row +') td:nth-child(2)', text => text.textContent);
+					let slot = await newPage.$eval('#ctl00_mainContent_divDetail table:nth-child('+ table + ') tbody tr:nth-child('+ row +') td:nth-child(3)', text => text.textContent);
+					let room = await newPage.$eval('#ctl00_mainContent_divDetail table:nth-child('+ table + ') tbody tr:nth-child('+ row +') td:nth-child(4)', text => text.textContent);
+					let teacher = await newPage.$eval('#ctl00_mainContent_divDetail table:nth-child('+ table + ') tbody tr:nth-child('+ row +') td:nth-child(5)', text => text.textContent);
+
+					dataObj.push({time,slot,room,teacher});				
+				}
+
 			}
 
             resolve(dataObj);
@@ -68,29 +73,29 @@ const scraperObject = {
 			await newPage.close();
 		});
 
-            let currentPageData = await pagePromise("https://ap.greenwich.edu.vn/Schedule/TimeTable.aspx?campus=7&term=56&group=GBC0902");
-			scrapedData = scrapedData.concat(currentPageData);
+            // let currentPageData = await pagePromise("https://ap.greenwich.edu.vn/Schedule/TimeTable.aspx?campus=7&term=56&group=GBC0902");
+			// scrapedData = scrapedData.concat(currentPageData);
 
             // currentPageData = await pagePromise("https://ap.greenwich.edu.vn/Schedule/TimeTable.aspx?campus=7&term=56&group=1644%20-%20TUTOR");
 			// scrapedData = scrapedData.concat(currentPageData);
 
 
-		// for (link in programmes){
-		// 	let groups = await getGroup(programmes[link]);
-		// 	// console.log(groups);
+		for (link in programmes){
+			let groups = await getGroup(programmes[link]);
+			// console.log(groups);
 
-        //     // SCRAPPED ALL DATA, not run now because very big data
-		// 	for (group in groups){
-		// 		console.log(groups[group]);
-		// 		for (link in groups[group]){
-		// 			console.log(groups[group][link]);
-		// 			if (groups[group][link] != []){
-		// 				let currentPageData = await pagePromise(groups[group][link]);
-		// 				scrapedData = scrapedData.concat(currentPageData);
-		// 			}
-		// 		}
-		// 	}
-		// }
+            // SCRAPPED ALL DATA, not run now because very big data
+			for (group in groups){
+				// console.log(groups[group]);
+				for (link in groups[group]){
+					console.log(groups[group][link]);
+					if (groups[group][link] != []){
+						let currentPageData = await pagePromise(groups[group][link]);
+						scrapedData = scrapedData.concat(currentPageData);
+					}
+				}
+			}
+		}
 
 		console.log(scrapedData);
 
