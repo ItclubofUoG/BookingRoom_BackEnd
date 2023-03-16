@@ -71,7 +71,8 @@ const scraperObject = {
 					const dateParts = time.split(' '); // split the date string into parts
 					const day = dateParts[1].split('/')[0];
 					const month = dateParts[1].split('/')[1];
-					const year = dateParts[2];
+					const year = dateParts[1].slice(-4);
+
 					// create a new Date object with the parsed date parts
 					const date = new Date(`${year}-${month}-${day}`);
 					const formatDate = date.toISOString();
