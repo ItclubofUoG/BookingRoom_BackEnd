@@ -1,3 +1,4 @@
+const dataBase = require('./dataBase');
 const scraperObject = {
 	url: 'https://ap.greenwich.edu.vn/Schedule/TimeTable.aspx',
 	async scraper(browser){
@@ -52,8 +53,12 @@ const scraperObject = {
 			// await newPage.goto(link, { waitUntil: 'networkidle2' });
 			await newPage.goto(link);
 
+			let classroom = await newPage.$eval('#ctl00_mainContent_divGroup table tbody b',text => text.textContent);
+
 			let numTable = await newPage.$$eval('#ctl00_mainContent_divDetail table',items => items.length);
+
 			// console.log(numTable);	
+
 			for (let table = 1; table <= numTable; table++) {
 				let numRow = await newPage.$$eval('#ctl00_mainContent_divDetail table:nth-child('+ table + ') tbody tr',items => items.length);
 
@@ -61,13 +66,22 @@ const scraperObject = {
 					let time = await newPage.$eval('#ctl00_mainContent_divDetail table:nth-child('+ table + ') tbody tr:nth-child('+ row +') td:nth-child(2)', text => text.textContent);
 					let slot = await newPage.$eval('#ctl00_mainContent_divDetail table:nth-child('+ table + ') tbody tr:nth-child('+ row +') td:nth-child(3)', text => text.textContent);
 					let room = await newPage.$eval('#ctl00_mainContent_divDetail table:nth-child('+ table + ') tbody tr:nth-child('+ row +') td:nth-child(4)', text => text.textContent);
-					let teacher = await newPage.$eval('#ctl00_mainContent_divDetail table:nth-child('+ table + ') tbody tr:nth-child('+ row +') td:nth-child(5)', text => text.textContent);
+					// let teacher = await newPage.$eval('#ctl00_mainContent_divDetail table:nth-child('+ table + ') tbody tr:nth-child('+ row +') td:nth-child(5)', text => text.textContent);
 
-					dataObj.push({time,slot,room,teacher});				
+					const dateParts = time.split(' '); // split the date string into parts
+					const day = dateParts[1].split('/')[0];
+					const month = dateParts[1].split('/')[1];
+					const year = dateParts[2];
+					// create a new Date object with the parsed date parts
+					const date = new Date(`${year}-${month}-${day}`);
+					const formatDate = date.toISOString();
+
+					dataObj.push([formatDate,slot,room,classroom]);				
 				}
 
 			}
 
+			
             resolve(dataObj);
 
 			await newPage.close();
@@ -98,6 +112,7 @@ const scraperObject = {
 		}
 
 		console.log(scrapedData);
+		dataBase.insert(scrapedData);
 
         //Example code
         // {
